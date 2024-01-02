@@ -27,10 +27,10 @@ async function run() {
         const purchasedSedanCollection = client.db("sedan_mela").collection("purchasedSedan");
 
         // get all the products
-        app.get("/sedans", async (req, res) => {
-            const sedans = await sedanCollection.find({}).toArray();
-            res.json(sedans);
-        })
+        // app.get("/sedans", async (req, res) => {
+        //     const sedans = await sedanCollection.find({}).toArray();
+        //     res.json(sedans);
+        // })
 
         // get all the review
         app.get("/testimonials", async (req, res) => {
@@ -45,6 +45,86 @@ async function run() {
             const result = await sedanCollection.findOne(query);
             res.json(result);
         })
+        
+        app.get("/sedans", async (req, res) => {
+            // Extract filter criteria from query parameters
+            const { engine, gear, gearType, fuelType, minPrice, maxPrice } = req.query;
+        
+            // Construct a query object based on the provided criteria
+            const query = {};
+        
+            if (engine) query.engine = engine;
+            if (gear) query.gear = parseInt(gear);
+            if (gearType) query.gearType = gearType;
+            if (fuelType) query.fuelType = fuelType;
+            if (minPrice && maxPrice) query.price = { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) };
+            else if (minPrice) query.price = { $gte: parseInt(minPrice) };
+            else if (maxPrice) query.price = { $lte: parseInt(maxPrice) };
+        
+            try {
+                // Use your MongoDB collection instance to find matching sedans
+                const result = await sedanCollection.find(query).toArray();
+        
+                // Return the result as JSON
+                res.json(result);
+            } catch (error) {
+                console.error(error);
+                // Handle the error and send an appropriate response
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
+        // Add a new route to get all unique engine types
+        app.get("/sedans/engines", async (req, res) => {
+            try {
+                // Use your MongoDB collection instance to get distinct engine types
+                const engineTypes = await sedanCollection.distinct("engine");
+                res.json(engineTypes);
+            } catch (error) {
+                console.error(error);
+                // Handle the error and send an appropriate response
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
+        app.get("/sedans/gears", async (req, res) => {
+            try {
+                // Use your MongoDB collection instance to get distinct engine types
+                const gearTypes = await sedanCollection.distinct("gear");
+                res.json(gearTypes);
+            } catch (error) {
+                console.error(error);
+                // Handle the error and send an appropriate response
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
+        });
+        // Add a new route to get all unique gear types
+app.get("/sedans/gearTypes", async (req, res) => {
+    try {
+        // Use your MongoDB collection instance to get distinct gear types
+        const gearTypes = await sedanCollection.distinct("gearType");
+        res.json(gearTypes);
+    } catch (error) {
+        console.error(error);
+        // Handle the error and send an appropriate response
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Add a new route to get all unique fuel types
+app.get("/sedans/fuelTypes", async (req, res) => {
+    try {
+        // Use your MongoDB collection instance to get distinct fuel types
+        const fuelTypes = await sedanCollection.distinct("fuelType");
+        res.json(fuelTypes);
+    } catch (error) {
+        console.error(error);
+        // Handle the error and send an appropriate response
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+        
+        
 
         // get all booked product for admin to control in dashboard
         app.get("/purchasedSedan/All", async (req, res) => {
@@ -137,7 +217,7 @@ async function run() {
         app.put("/purchasedSedan/All/:id", async (req, res) => {
             const id = req.params.id;
 
-            const query = { _id: new (id) };
+            const query = { _id:  (id) };
             const updateDoc = { $set: { status: "shipped" } };
             const options = { upsert: false };
             const updatedStatus = await purchasedSedanCollection.updateOne(query, updateDoc, options);
