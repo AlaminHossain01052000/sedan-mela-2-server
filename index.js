@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // connecting node js with mongodb
-const uri = `mongodb+srv://sedanMela:yOovhds1Bqmo8rUz@cluster0.li11u.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://siyamrpsu:4wCxlcVEN0pQ0WDc@cluster0.fmrizb2.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
